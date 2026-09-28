@@ -1,0 +1,134 @@
+[
+ {
+  "backend": "sf3d",
+  "repo": "Stability-AI/stable-fast-3d",
+  "commit": "ff21fc491b4dc5314bf6734c7c0dabd86b5f5bb2",
+  "python": "3.10",
+  "torch": "2.5.1",
+  "build": "cu124",
+  "index": "https://download.pytorch.org/whl/cu124",
+  "min_capability": "5.0",
+  "max_capability": "9.0",
+  "platform": "win_amd64",
+  "packages": [
+   {
+    "package": "texture_baker",
+    "dir": "texture_baker"
+   },
+   {
+    "package": "uv_unwrapper",
+    "dir": "uv_unwrapper"
+   }
+  ]
+ },
+ {
+  "backend": "sf3d",
+  "repo": "Stability-AI/stable-fast-3d",
+  "commit": "ff21fc491b4dc5314bf6734c7c0dabd86b5f5bb2",
+  "python": "3.10",
+  "torch": "2.7.1",
+  "build": "cu128",
+  "index": "https://download.pytorch.org/whl/cu128",
+  "min_capability": "7.5",
+  "max_capability": "12.0",
+  "platform": "win_amd64",
+  "packages": [
+   {
+    "package": "texture_baker",
+    "dir": "texture_baker"
+   },
+   {
+    "package": "uv_unwrapper",
+    "dir": "uv_unwrapper"
+   }
+  ]
+ },
+ {
+  "backend": "sf3d",
+  "repo": "Stability-AI/stable-fast-3d",
+  "commit": "ff21fc491b4dc5314bf6734c7c0dabd86b5f5bb2",
+  "python": "3.10",
+  "torch": "2.5.1",
+  "build": "cpu",
+  "index": "https://download.pytorch.org/whl/cpu",
+  "min_capability": null,
+  "max_capability": null,
+  "platform": "win_amd64",
+  "packages": [
+   {
+    "package": "texture_baker",
+    "dir": "texture_baker"
+   },
+   {
+    "package": "uv_unwrapper",
+    "dir": "uv_unwrapper"
+   }
+  ]
+ },
+ {
+  "backend": "spar3d",
+  "repo": "Stability-AI/stable-point-aware-3d",
+  "commit": "fdc311b16809e6a8adc2f5a3407ebb3db1a95bd1",
+  "python": "3.10",
+  "torch": "2.5.1",
+  "build": "cu124",
+  "index": "https://download.pytorch.org/whl/cu124",
+  "min_capability": "5.0",
+  "max_capability": "9.0",
+  "platform": "win_amd64",
+  "packages": [
+   {
+    "package": "texture_baker",
+    "dir": "texture_baker"
+   },
+   {
+    "package": "uv_unwrapper",
+    "dir": "uv_unwrapper"
+   }
+  ]
+ },
+ {
+  "backend": "spar3d",
+  "repo": "Stability-AI/stable-point-aware-3d",
+  "commit": "fdc311b16809e6a8adc2f5a3407ebb3db1a95bd1",
+  "python": "3.10",
+  "torch": "2.7.1",
+  "build": "cu128",
+  "index": "https://download.pytorch.org/whl/cu128",
+  "min_capability": "7.5",
+  "max_capability": "12.0",
+  "platform": "win_amd64",
+  "packages": [
+   {
+    "package": "texture_baker",
+    "dir": "texture_baker"
+   },
+   {
+    "package": "uv_unwrapper",
+    "dir": "uv_unwrapper"
+   }
+  ]
+ },
+ {
+  "backend": "spar3d",
+  "repo": "Stability-AI/stable-point-aware-3d",
+  "commit": "fdc311b16809e6a8adc2f5a3407ebb3db1a95bd1",
+  "python": "3.10",
+  "torch": "2.5.1",
+  "build": "cpu",
+  "index": "https://download.pytorch.org/whl/cpu",
+  "min_capability": null,
+  "max_capability": null,
+  "platform": "win_amd64",
+  "packages": [
+   {
+    "package": "texture_baker",
+    "dir": "texture_baker"
+   },
+   {
+    "package": "uv_unwrapper",
+    "dir": "uv_unwrapper"
+   }
+  ]
+ }
+]

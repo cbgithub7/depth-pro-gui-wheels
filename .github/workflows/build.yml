@@ -1,0 +1,102 @@
+# Builds every entry of builds.json on Windows, tests each wheel, and -- only when a release tag is
+# given -- publishes them all as one release with a manifest.json depth-pro-gui's contract copies
+# (file, sha256, commit, torch pin). Nothing publishes on push: a release is asked for by name.
+name: build
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: "Release tag to publish under, e.g. sf3d-spar3d-1 (empty: build and test only)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: matrix
+        # The CUDA toolkit a build compiles with: the release of the line torch was built against.
+        run: |
+          python3 - >> "$GITHUB_OUTPUT" <<'PY'
+          import json
+          cuda = {"cu124": "12.4.1", "cu128": "12.8.1"}
+          rows = json.load(open("builds.json", encoding="utf-8"))
+          include = [{"backend": r["backend"], "torch": r["torch"], "build": r["build"],
+                      "python": r["python"], "cuda": cuda.get(r["build"], "")} for r in rows]
+          missing = [r["build"] for r in include if r["build"] != "cpu" and not r["cuda"]]
+          if missing:
+              raise SystemExit(f"no CUDA toolkit is named for {missing}")
+          print("matrix=" + json.dumps({"include": include}))
+          PY
+
+  wheel:
+    needs: plan
+    name: ${{ matrix.backend }} torch ${{ matrix.torch }} ${{ matrix.build }}
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+      # Only what the build includes: nvcc and the runtime, and the headers torch's CUDA headers
+      # pull in (cuBLAS, cuSPARSE, cuSOLVER) plus thrust.
+      - uses: Jimver/cuda-toolkit@v0.2.36
+        if: matrix.build != 'cpu'
+        with:
+          cuda: ${{ matrix.cuda }}
+          method: network
+          sub-packages: '["nvcc", "cudart", "cublas_dev", "cusparse_dev", "cusolver_dev", "thrust", "visual_studio_integration"]'
+      - uses: ilammy/msvc-dev-cmd@v1.13.0
+      - name: Build and test
+        run: python build.py ${{ matrix.backend }} ${{ matrix.torch }} ${{ matrix.build }} --out dist
+      - uses: actions/upload-artifact@v7
+        with:
+          name: wheels-${{ matrix.backend }}-${{ matrix.torch }}-${{ matrix.build }}
+          path: dist/
+          if-no-files-found: error
+
+  release:
+    needs: wheel
+    if: inputs.release != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: wheels-*
+          path: dist
+          merge-multiple: true
+      - name: Manifest
+        env:
+          TAG: ${{ inputs.release }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import glob, json, os
+          base = f"https://github.com/{os.environ['REPO']}/releases/download/{os.environ['TAG']}/"
+          rows = []
+          for path in sorted(glob.glob("dist/manifest-*.json")):
+              rows.extend(json.load(open(path, encoding="utf-8")))
+          for row in rows:
+              row["url"] = base + row["asset"]
+          json.dump({"release": os.environ["TAG"], "wheels": rows}, open("dist/manifest.json", "w", encoding="utf-8"), indent=1)
+          PY
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.release }}
+        run: |
+          gh release create "$TAG" dist/*.whl dist/manifest.json dist/*-LICENSE.md NOTICE \
+            --repo "${{ github.repository }}" --title "$TAG" --notes-file RELEASE_NOTES.md
