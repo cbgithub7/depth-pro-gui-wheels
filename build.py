@@ -127,10 +127,15 @@ def main() -> int:
     run([*pip, "install", *BUILD_REQUIREMENTS])
 
     env = dict(os.environ, USE_NATIVE_ARCH="0", USE_CUDA="0" if row["build"] == "cpu" else "1")
+    # With a Visual Studio environment already active (the workflow's msvc-dev-cmd), torch refuses
+    # to build unless setuptools is told to use it rather than activate its own. With none active,
+    # as on a desktop, setuptools finds the compiler itself.
+    if env.get("VCINSTALLDIR"):
+        env["DISTUTILS_USE_SDK"] = "1"
     cuda_arch = None
     if row["build"] != "cpu":
         cuda_arch = arch_list(row["min_capability"], row["max_capability"])
-        env.update(TORCH_CUDA_ARCH_LIST=cuda_arch, DISTUTILS_USE_SDK="1",
+        env.update(TORCH_CUDA_ARCH_LIST=cuda_arch,
                    NVCC_APPEND_FLAGS=(env.get("NVCC_APPEND_FLAGS", "") + " -allow-unsupported-compiler").strip())
         if not (env.get("CUDA_PATH") or env.get("CUDA_HOME")):
             raise SystemExit(f"{tag} builds CUDA kernels, and no CUDA toolkit is set up (CUDA_PATH)")
